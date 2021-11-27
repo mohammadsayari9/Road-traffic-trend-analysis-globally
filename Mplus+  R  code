@@ -1,0 +1,53 @@
+Mplus code
+TITLE: this is an example of a GMM for a
+continuous outcome using automatic
+starting values and random starts
+DATA: FILE IS ex6.4yalldel.dat;
+VARIABLE: NAMES = ID U1 U2 U3 U4 hdi edu income life ;
+
+USEVAR =  U1 U2 U3 U4 hdi ;
+IDVARIABLE=ID;
+ANALYSIS: ESTIMATOR = MLR;
+
+
+MODEL:%
+i s  | U1@0 U2@1 U3@2 U4@3 ;
+
+i s  ON hdi;
+c on hdi;
+
+
+
+
+OUTPUT: 
+SAMPSTAT ;
+tech14; tech1; tech11; 
+Plot: 
+Series U1 U2 U3 U4(*); 
+type=plot3;
+SAVEDATA: File= 7hdi1class.sav;
+
+R code
+rm(list=ls())
+require(foreign)
+library(rpart)
+library(rpart.plot)
+library(randomForestExplainer)
+library(rworldmap)
+library(rworldxtra)
+
+library(randomForest)
+fit <- rpart(S  ~edus + incomes + lifes, data=dat )
+fit <- rpart(C  ~EDU +   INCOME + LIFE , data=dat, method = "class" )
+rpart.plot(fit, type=3, extra=1, cex=0.99, under=F, fallen.leaves=T, digits=4)
+forest <- randomForest(binarys  ~ meanedu +   meanincome + meanlife, data=dat, proximity=TRUE)
+forest <- randomForest(binarys  ~ meanhdi, data=dat, proximity=TRUE)
+importance(forest,type= 2)
+
+sPDF <- joinCountryData2Map( dat , joinCode = "ISO3" , nameJoinColumn = "ISO",mapResolution = "coarse")
+par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i") 
+
+mapCountryData( sPDF , nameColumnToPlot='slope' , catMethod='categorical' , oceanCol='lightblue' , missingCountryCol='white' )
+identifyCountries( plotSelected = F, cex = 0.9)
+
+op <- palette(c('yellow','red'))
